@@ -1,0 +1,99 @@
+// ================= BLYNK CONFIG =================
+#define BLYNK_TEMPLATE_ID "TMPL6qyMgDNwM"
+#define BLYNK_TEMPLATE_NAME "Praktikum04"
+#define BLYNK_AUTH_TOKEN "H-mikzLinLx-d26sCujn-1HMlL_bztdE"
+
+// ================= LIBRARY ======================
+#include <Servo.h>
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+
+// ================= PIN CONFIG ===================
+#define LED_ON_PIN   21
+#define LED_OFF_PIN  19
+#define RELAY_PIN     5
+#define SERVO_PIN    22
+
+// ================= WIFI =========================
+char ssid[] = "IBDA";
+char pass[] = "tidaktauka1101x";
+
+// ================= OBJECT =======================
+Servo myServo;
+
+// ================= BLYNK SWITCH =================
+BLYNK_WRITE(V1) {
+  int value = param.asInt();
+
+  Serial.print("Blynk V1 = ");
+  Serial.println(value);
+
+  if (value == 1) {
+    // ===== ON =====
+    digitalWrite(RELAY_PIN, HIGH);
+    myServo.write(90);
+
+    digitalWrite(LED_ON_PIN, HIGH);
+    digitalWrite(LED_OFF_PIN, LOW);
+
+    Serial.println("SYSTEM ON");
+    Serial.println("Relay : ON");
+    Serial.println("Servo : 90 derajat");
+    Serial.println("LED ON : NYALA");
+  } 
+  else {
+    // ===== OFF =====
+    digitalWrite(RELAY_PIN, LOW);
+    myServo.write(0);
+
+    digitalWrite(LED_ON_PIN, LOW);
+    digitalWrite(LED_OFF_PIN, HIGH);
+
+    Serial.println("SYSTEM OFF");
+    Serial.println("Relay : OFF");
+    Serial.println("Servo : 0 derajat");
+    Serial.println("LED OFF : NYALA");
+  }
+
+  Serial.println("--------------------------------");
+}
+
+// ================= SETUP ========================
+void setup() {
+  Serial.begin(115200);
+  Serial.println("ESP32 START");
+
+  // PIN MODE
+  pinMode(LED_ON_PIN, OUTPUT);
+  pinMode(LED_OFF_PIN, OUTPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+
+  // SERVO
+  myServo.attach(SERVO_PIN);
+  myServo.write(0);
+
+  // DEFAULT STATE
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(LED_ON_PIN, LOW);
+  digitalWrite(LED_OFF_PIN, HIGH);
+
+  // WIFI
+  WiFi.begin(ssid, pass);
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi CONNECTED");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  // BLYNK
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  Serial.println("Blynk CONNECTED");
+}
+
+// ================= LOOP =========================
+void loop() {
+  Blynk.run();
+}
